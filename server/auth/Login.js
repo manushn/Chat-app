@@ -38,17 +38,12 @@ router.post("/login", async (req, res) => {
         );
 
         const encryptedJwt = CryptoJS.AES.encrypt(jwttoken, process.env.ENCRYPTION_KEY).toString();
-        res.cookie("token", encryptedJwt, {
-            httpOnly: false,
-            secure: true,
-            sameSite: "Lax",
-            maxAge: 7 * 24 * 60 * 60 * 1000,
-        });
-
+        
         return res.status(200).json({
             success: true,
             message: "Login successful!",
             username: user.username,
+            token:encryptedJwt,
         });
 
     } catch (error) {
@@ -59,7 +54,7 @@ router.post("/login", async (req, res) => {
 
 
 router.get("/autologin", async (req, res) => {
-    const token = req.cookies.token;
+    const token = req.headers.authorization?.split(" ")[1];
     
     if (!token) {
         console.log("No token")
@@ -95,21 +90,17 @@ router.get("/autologin", async (req, res) => {
                 const newJwtToken = jwt.sign(
                     { username: user.username, name: user.name, email: user.email },
                     process.env.JWT_SECRET_KEY,
-                    { expiresIn: process.env.TOKEN_EXPIRATION }
+                    { expiresIn: String(process.env.TOKEN_EXPAIRATION) }
                 );
 
                 const newEncryptedJwt = CryptoJS.AES.encrypt(newJwtToken, process.env.ENCRYPTION_KEY).toString();
-                res.cookie("token", newEncryptedJwt, {
-                    httpOnly: true,
-                    secure: true,
-                    sameSite: "Strict",
-                    maxAge: 3600000,
-                });
+                
 
                 return res.status(200).json({
                     success: true,
                     message: "Auto-login successful!",
                     username: decoded.username,
+                    token:newEncryptedJwt,
                 });
 
             } catch (error) {

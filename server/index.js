@@ -3,11 +3,13 @@ const http = require('http');
 const cors = require('cors');
 const { MongoClient, ServerApiVersion } = require('mongodb');
 
+
 const mongoose = require('mongoose');
 const dotenv =require('dotenv');
 
 const Signup=require("./auth/Signup");
 const Login=require("./auth/Login");
+const initializeSocket=require("./socket/socketmain");
 
 dotenv.config();
 
@@ -15,8 +17,8 @@ const app=express();
 const server=http.createServer(app);
 
 app.use(cors({
-  origin: "http://localhost:5173",  
-  credentials: true 
+  origin: ["http://192.168.1.23:5173", "http://localhost:5173"]
+  
 }));
 app.use(express.json());
 
@@ -35,7 +37,7 @@ mongoose.connect(MONGO_URI, {
 app.use('/',Signup);
 app.use('/',Login);
 
-
+initializeSocket(server);
 
 // Start the Server After DB Connection
 const PORT = process.env.PORT || 5000;

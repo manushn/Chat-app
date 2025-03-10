@@ -7,29 +7,36 @@ function LoadingPage() {
   const navigate = useNavigate();
   const [message, setMessage] = useState("");
 
+  const token=localStorage.getItem('token');
+
   useEffect(() => {
     const autoLogin = async () => {
       try {
-        const response = await axios.get("http://localhost:4000/autologin", {
-          withCredentials: true, // Ensures cookies are sent
+        const response = await axios.get("http://192.168.1.23:4000/autologin", {
+          headers: {
+            Authorization: `Bearer ${token}`, 
+          },
         });
 
-        if (response.data.success) {
+
+        if (response.data.success===true) {
           sessionStorage.setItem("islogedin", true);
           sessionStorage.setItem("Username", response.data.username);
+          localStorage.setItem("token",response.data.token);
           navigate("/chats");
-        } else {
+        }
+        if(response.data.success===false) {
           navigate('/login');
           console.log("No Token provided")
         }
       } catch (error) {
-        setMessage("Please login manually.");
-        navigate('/login'); // Redirect if auto-login fails
+        setMessage("Error in Connecting with Backend!");
+       console.log(error) // Redirect if auto-login fails
       }
     };
 
     autoLogin();
-  }, [navigate]); // Added `navigate` as a dependency
+  }, []); // Added `navigate` as a dependency
 
   return (
     <div className="loading-container">

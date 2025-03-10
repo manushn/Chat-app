@@ -13,10 +13,7 @@ function Protectedroute({children}) {
         console.log("No logedin")
         navigate("/login")
     }
-    if (!token){
-      console.log("No token")
-      navigate("/login")
-  }
+    
 
   },[navigate,islogedin,token]);
 
